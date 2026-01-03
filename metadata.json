@@ -1,0 +1,7 @@
+{
+  "name": "Seoul Travel Planner",
+  "description": "A smart itinerary planner for Seoul travel with AI-powered suggestions, weather integration, and navigation aids.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
