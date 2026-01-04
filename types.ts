@@ -1,11 +1,7 @@
-export interface WeatherData {
-  id: string;
-  day: string;
-  date: string;
-  fullDate: string;
-  tempHigh?: number;
-  tempLow?: number;
-  condition: 'sunny' | 'cloudy' | 'rainy' | 'unknown';
+export interface TripMeta {
+  title: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface ItineraryItem {
@@ -23,6 +19,7 @@ export interface ChecklistItem {
   id: string;
   text: string;
   isChecked: boolean;
+  category: 'luggage' | 'shopping';
 }
 
 export interface ExpenseItem {
@@ -32,12 +29,13 @@ export interface ExpenseItem {
   amountTWD: number;
   date: string;
   category: string;
+  exchangeRate: number;
 }
 
 export interface FlightDetail {
   airline: string;
   flightNumber: string;
-  time: string; // Departure time
+  time: string;
   terminal: string;
 }
 
@@ -49,9 +47,24 @@ export interface FlightInfo {
 export interface HotelInfo {
   name: string;
   address: string;
-  checkIn: string; // Time or Date
+  checkIn: string;
   checkOut: string;
   bookingRef: string;
+}
+
+export interface User {
+  uid: string;
+  username: string;
+}
+
+export interface WeatherData {
+  id: string;
+  day: string;
+  date: string;
+  fullDate: string;
+  tempHigh?: number;
+  tempLow?: number;
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'unknown';
 }
 
 export type TabType = 'itinerary' | 'map' | 'checklist' | 'expenses' | 'info';

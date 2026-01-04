@@ -10,5 +10,6 @@ export default defineConfig(({ mode }) => {
       'process.env.FIREBASE_CONFIG': JSON.stringify(env.FIREBASE_CONFIG),
       'process.env.APP_ID': JSON.stringify(env.APP_ID),
     },
+    base: './',
   };
 });

@@ -1,18 +1,18 @@
 import React from 'react';
-import { 
-  MapPin, Utensils, ShoppingBag, Camera, Coffee, Landmark, 
-  Wallet, Sparkles, Loader2, Trash2, ArrowUp, ArrowDown 
+import {
+  MapPin, Utensils, ShoppingBag, Camera, Coffee, Landmark,
+  Wallet, Sparkles, Loader2, Trash2, ArrowUp, ArrowDown, Navigation
 } from 'lucide-react';
 import { ItineraryItem } from '../types';
 
 const getCategoryStyle = (category: string) => {
   const c = category || '';
-  
+
   // 1. Cafe / Dessert (Amber)
   if (["咖啡廳", "甜點"].includes(c)) {
     return { bg: 'bg-amber-50', text: 'text-amber-700', icon: <Coffee size={10} /> };
   }
-  
+
   // 2. Food / Bar (Orange)
   if (["餐廳", "酒吧"].includes(c)) {
     return { bg: 'bg-orange-50', text: 'text-orange-600', icon: <Utensils size={10} /> };
@@ -35,19 +35,19 @@ const getCategoryStyle = (category: string) => {
 
   // Fallback for older data or custom inputs (Keyword matching)
   const text = c.toLowerCase();
-  if (text.includes('coffee') || text.includes('茶') || text.includes('tea') || text.includes('cake')) 
+  if (text.includes('coffee') || text.includes('茶') || text.includes('tea') || text.includes('cake'))
     return { bg: 'bg-amber-50', text: 'text-amber-700', icon: <Coffee size={10} /> };
-  
-  if (text.includes('食') || text.includes('餐') || text.includes('food') || text.includes('麵') || text.includes('肉') || text.includes('酒')) 
+
+  if (text.includes('食') || text.includes('餐') || text.includes('food') || text.includes('麵') || text.includes('肉') || text.includes('酒'))
     return { bg: 'bg-orange-50', text: 'text-orange-600', icon: <Utensils size={10} /> };
 
-  if (text.includes('購') || text.includes('買') || text.includes('shop') || text.includes('mall')) 
+  if (text.includes('購') || text.includes('買') || text.includes('shop') || text.includes('mall'))
     return { bg: 'bg-pink-50', text: 'text-pink-600', icon: <ShoppingBag size={10} /> };
 
-  if (text.includes('史') || text.includes('古') || text.includes('展') || text.includes('art') || text.includes('藝')) 
+  if (text.includes('史') || text.includes('古') || text.includes('展') || text.includes('art') || text.includes('藝'))
     return { bg: 'bg-stone-100', text: 'text-stone-600', icon: <Landmark size={10} /> };
 
-  if (text.includes('景') || text.includes('遊') || text.includes('view') || text.includes('park') || text.includes('山')) 
+  if (text.includes('景') || text.includes('遊') || text.includes('view') || text.includes('park') || text.includes('山'))
     return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: <Camera size={10} /> };
 
   // Default (Blue)
@@ -65,19 +65,19 @@ interface ItineraryCardProps {
   loadingInsight: boolean;
 }
 
-const ItineraryCard: React.FC<ItineraryCardProps> = ({ 
+const ItineraryCard: React.FC<ItineraryCardProps> = ({
   item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, loadingInsight
 }) => {
   const catStyle = getCategoryStyle(item.category);
 
   const handleOpenNaverMap = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    const query = encodeURIComponent(item.addressKR || item.address);
+    e.stopPropagation();
+    const query = encodeURIComponent(item.addressKR || item.address || item.title);
     window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     e.preventDefault();
     onDelete();
   };
@@ -113,14 +113,17 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
               {item.category}
             </span>
           </div>
-          
+
           <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 truncate">{item.title}</h3>
-          
+
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center text-slate-500 gap-1.5 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={handleOpenNaverMap}>
-              <MapPin size={14} className="flex-shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-xs truncate font-medium">{item.address}</span>
+            <div className="flex items-start text-slate-500 gap-1.5 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={handleOpenNaverMap}>
+              <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-medium leading-tight">{item.address}</span>
+                {item.addressKR && (
+                  <span className="text-[10px] text-slate-400 font-normal leading-tight mt-0.5">{item.addressKR}</span>
+                )}
               </div>
             </div>
             {item.budget && (
@@ -131,8 +134,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             )}
           </div>
 
-           {!item.aiInsight ? (
-            <button 
+          {!item.aiInsight ? (
+            <button
               onClick={(e) => { e.stopPropagation(); onGenerateInsight(item.id, item.title); }}
               disabled={loadingInsight}
               className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50 border border-slate-100 hover:border-indigo-100 z-10 relative"
@@ -142,19 +145,27 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             </button>
           ) : (
             <div className="mt-3 bg-indigo-50/50 rounded-xl p-3 border border-indigo-100/50 animate-in fade-in duration-500">
-               <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2">
                 <Sparkles size={14} className="text-indigo-500 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-indigo-900/80 leading-relaxed font-medium">{item.aiInsight}</p>
               </div>
             </div>
           )}
+
+          <button
+            onClick={handleOpenNaverMap}
+            className="mt-3 w-full py-2 bg-[#03C75A] hover:bg-[#02b351] text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-green-100 active:scale-95"
+          >
+            <Navigation size={12} />
+            <span>Naver Map 導航</span>
+          </button>
         </div>
-        
+
         {/* Actions Column */}
         <div className="flex flex-col gap-2 relative z-30">
-          <button 
-            onClick={handleDelete} 
-            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors active:scale-95 shadow-sm border border-slate-100" 
+          <button
+            onClick={handleDelete}
+            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors active:scale-95 shadow-sm border border-slate-100"
             title="刪除"
           >
             <Trash2 size={16} />
