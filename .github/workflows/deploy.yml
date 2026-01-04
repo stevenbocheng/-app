@@ -24,6 +24,7 @@ jobs:
         run: |
           npm install
           npm run build
+          touch dist/.nojekyll
         env:
           # Mapping GitHub Secrets to Environment Variables
           VITE_GOOGLE_SHEET_ID: ${{ secrets.VITE_GOOGLE_SHEET_ID }}
