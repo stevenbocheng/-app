@@ -28,14 +28,15 @@ const mapWeatherCode = (code: number): 'sunny' | 'cloudy' | 'rainy' => {
 };
 
 const getDayName = (dateStr: string) => {
-  const date = new Date(dateStr);
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   const days = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
   return days[date.getDay()];
 };
 
 const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${date.getMonth() + 1}/${date.getDate()}`;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return `${month}/${day}`;
 };
 
 const generateDates = (startDateStr: string, endDateStr: string): WeatherData[] => {
