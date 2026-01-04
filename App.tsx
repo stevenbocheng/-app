@@ -131,11 +131,20 @@ export default function App() {
     name: '', address: '', checkIn: '', checkOut: '', bookingRef: ''
   });
 
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [endDate, setEndDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 4);
-    return d.toISOString().split('T')[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   });
 
   const [selectedDay, setSelectedDay] = useState(1);
@@ -170,8 +179,9 @@ export default function App() {
         const data = await fetchSheetData(user.uid);
         if (data.meta) {
           setTripTitle(data.meta.title);
-          if (data.meta.startDate) setStartDate(data.meta.startDate.split('T')[0]);
-          if (data.meta.endDate) setEndDate(data.meta.endDate.split('T')[0]);
+          // Ensure we use the raw YYYY-MM-DD string from backend to avoid any timezone shifts
+          if (data.meta.startDate) setStartDate(data.meta.startDate.substring(0, 10));
+          if (data.meta.endDate) setEndDate(data.meta.endDate.substring(0, 10));
         }
         if (data.itinerary) {
           const groupedItineraries: Record<number, ItineraryItem[]> = {};
