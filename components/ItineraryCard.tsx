@@ -6,22 +6,51 @@ import {
 import { ItineraryItem } from '../types';
 
 const getCategoryStyle = (category: string) => {
-  const text = (category || '').toLowerCase();
-  if (text.includes('食') || text.includes('餐') || text.includes('food') || text.includes('cafe')) {
-    return { bg: 'bg-orange-50', text: 'text-orange-600', icon: <Utensils size={10} /> };
-  }
-  if (text.includes('咖') || text.includes('coffee') || text.includes('茶')) {
+  const c = category || '';
+  
+  // 1. Cafe / Dessert (Amber)
+  if (["咖啡廳", "甜點"].includes(c)) {
     return { bg: 'bg-amber-50', text: 'text-amber-700', icon: <Coffee size={10} /> };
   }
-  if (text.includes('購') || text.includes('買') || text.includes('shop') || text.includes('mall')) {
+  
+  // 2. Food / Bar (Orange)
+  if (["餐廳", "酒吧"].includes(c)) {
+    return { bg: 'bg-orange-50', text: 'text-orange-600', icon: <Utensils size={10} /> };
+  }
+
+  // 3. Shopping (Pink)
+  if (["購物", "百貨", "市集"].includes(c)) {
     return { bg: 'bg-pink-50', text: 'text-pink-600', icon: <ShoppingBag size={10} /> };
   }
-  if (text.includes('景') || text.includes('遊') || text.includes('看') || text.includes('sight')) {
-    return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: <Camera size={10} /> };
-  }
-  if (text.includes('史') || text.includes('古') || text.includes('宫') || text.includes('museum')) {
+
+  // 4. History / Art (Stone)
+  if (["古蹟", "博物館", "美術館"].includes(c)) {
     return { bg: 'bg-stone-100', text: 'text-stone-600', icon: <Landmark size={10} /> };
   }
+
+  // 5. Sightseeing / Fun (Emerald)
+  if (["景點", "公園", "樂園", "體驗", "住宿", "交通"].includes(c)) {
+    return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: <Camera size={10} /> };
+  }
+
+  // Fallback for older data or custom inputs (Keyword matching)
+  const text = c.toLowerCase();
+  if (text.includes('coffee') || text.includes('茶') || text.includes('tea') || text.includes('cake')) 
+    return { bg: 'bg-amber-50', text: 'text-amber-700', icon: <Coffee size={10} /> };
+  
+  if (text.includes('食') || text.includes('餐') || text.includes('food') || text.includes('麵') || text.includes('肉') || text.includes('酒')) 
+    return { bg: 'bg-orange-50', text: 'text-orange-600', icon: <Utensils size={10} /> };
+
+  if (text.includes('購') || text.includes('買') || text.includes('shop') || text.includes('mall')) 
+    return { bg: 'bg-pink-50', text: 'text-pink-600', icon: <ShoppingBag size={10} /> };
+
+  if (text.includes('史') || text.includes('古') || text.includes('展') || text.includes('art') || text.includes('藝')) 
+    return { bg: 'bg-stone-100', text: 'text-stone-600', icon: <Landmark size={10} /> };
+
+  if (text.includes('景') || text.includes('遊') || text.includes('view') || text.includes('park') || text.includes('山')) 
+    return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: <Camera size={10} /> };
+
+  // Default (Blue)
   return { bg: 'bg-blue-50', text: 'text-blue-600', icon: <MapPin size={10} /> };
 };
 

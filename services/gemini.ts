@@ -19,14 +19,28 @@ const getAiClient = () => {
 };
 
 export const getPlaceDetails = async (placeName: string) => {
-  const prompt = `使用者想去首爾的「${placeName}」。請提供：1. 詳細中文地址(address)。 2. 詳細韓文地址(addressKR, 用於Naver Map導航)。 3. 最適合的類別(category)。 4. 預估人均消費(budget, 韓元)。`;
+  // 定義嚴格的分類清單
+  const categories = [
+    "餐廳", "咖啡廳", "甜點", "購物", "百貨", "市集", 
+    "景點", "公園", "樂園", "古蹟", "博物館", "美術館", 
+    "體驗", "酒吧", "交通", "住宿"
+  ];
+
+  const prompt = `使用者想去首爾的「${placeName}」。請提供：
+1. 詳細中文地址(address)。
+2. 詳細韓文地址(addressKR, 用於Naver Map導航)。
+3. 最適合的類別(category)。必須從清單中選擇最精確的一個。
+4. 預估人均消費(budget, 韓元, 例如: ₩15,000)。`;
   
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
       address: { type: Type.STRING },
       addressKR: { type: Type.STRING },
-      category: { type: Type.STRING },
+      category: { 
+        type: Type.STRING,
+        enum: categories // 強制 AI 只能從上面定義的清單中選一個
+      },
       budget: { type: Type.STRING },
     },
     required: ["address", "addressKR", "category", "budget"],
@@ -40,6 +54,7 @@ export const getPlaceDetails = async (placeName: string) => {
       config: {
         responseMimeType: "application/json",
         responseSchema: schema,
+        thinkingConfig: { thinkingBudget: 0 } // 關閉深度思考以加快速度
       },
     });
     return JSON.parse(response.text || "{}");
@@ -59,6 +74,9 @@ export const getPlaceInsight = async (title: string) => {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
+      config: {
+        thinkingConfig: { thinkingBudget: 0 } // 關閉深度思考以加快速度
+      }
     });
     return response.text || "AI 暫時無法回應。";
   } catch (error: any) {
@@ -79,6 +97,9 @@ export const getTripSuggestion = async (titles: string[], day: number) => {
         const response = await ai.models.generateContent({
             model: MODEL_NAME,
             contents: prompt,
+            config: {
+                thinkingConfig: { thinkingBudget: 0 } // 關閉深度思考以加快速度
+            }
         });
         return response.text || "暫無建議";
     } catch (error: any) {
