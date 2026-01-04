@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   MapPin, Calendar as CalendarIcon, Menu, Loader2, Sparkles, MessageCircle, 
-  X, Plus, Edit3, Navigation, CalendarDays, CheckCircle2, User, Trash2, ClipboardList, Wallet, Info
+  X, Plus, Edit3, Navigation, CalendarDays, CheckCircle2, User, Trash2, ClipboardList, Wallet, Info, Settings
 } from 'lucide-react';
 
 import { auth, db, appId, signInAnonymously, onAuthStateChanged, signInWithCustomToken, doc, setDoc, onSnapshot, isConfigValid } from './services/firebase';
@@ -18,6 +18,7 @@ import ChecklistView from './components/ChecklistView';
 import CurrencyCalculator from './components/CurrencyCalculator';
 import TripInfoView from './components/TripInfoView';
 import ExpenseTracker from './components/ExpenseTracker';
+import SettingsModal from './components/SettingsModal';
 
 // --- Helpers ---
 const mapWeatherCode = (code: number): 'sunny' | 'cloudy' | 'rainy' => {
@@ -129,6 +130,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('itinerary');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -560,6 +562,7 @@ export default function App() {
 
         <AddItemModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddItem} />
         <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} tripId={currentTripId} onLogout={handleLogout} />
+        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         <DeleteConfirmModal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={confirmDelete} />
         <CurrencyCalculator />
 
@@ -577,14 +580,24 @@ export default function App() {
               <Edit3 size={16} className="absolute right-0 top-1.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </div>
           </div>
-          <button 
-            onClick={() => setIsProfileOpen(true)}
-            className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0"
-          >
-             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                <User size={20} />
-             </div>
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0 text-slate-500 hover:text-blue-600"
+            >
+               <div className="w-10 h-10 rounded-full flex items-center justify-center">
+                  <Settings size={20} />
+               </div>
+            </button>
+            <button 
+              onClick={() => setIsProfileOpen(true)}
+              className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0"
+            >
+               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                  <User size={20} />
+               </div>
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto pb-40 scrollbar-hide relative z-10">
