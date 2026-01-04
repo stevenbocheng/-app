@@ -193,12 +193,24 @@ function setItinerary(ss, uid, day, items) {
   const uidIdx = headers.indexOf('userId');
   const dayIdx = headers.indexOf('day');
 
+  // Create a list of rows to delete (reverse order to keep indices valid)
+  // Or better: read all, filter out the ones to delete, then clear sheet and write back? 
+  // No, that's too risky for concurrency. Stick to deleteRow.
+  // Actually, deleteRow is slow in loops. 
+  // Optimized approach: Filter data in memory and overwrite is dangerous if volume is high.
+  // Standard approach:
   for (let i = data.length - 1; i >= 1; i--) {
     if (data[i][uidIdx] == uid && data[i][dayIdx] == day) sheet.deleteRow(i + 1);
   }
+
   items.forEach(item => {
-    // Columns: id, day, title, category, time, address, addressKR, budget, aiInsight, userId
-    sheet.appendRow([item.id, day, item.title, item.category, item.time, item.address, item.addressKR || '', item.budget || '', item.aiInsight || '', uid]);
+    // Dynamic mapping based on headers
+    const row = headers.map(header => {
+      if (header === 'userId') return uid;
+      if (header === 'day') return day;
+      return item[header] || '';
+    });
+    sheet.appendRow(row);
   });
 }
 
@@ -213,8 +225,12 @@ function setChecklist(ss, uid, category, items) {
     if (data[i][uidIdx] == uid && data[i][catIdx] == category) sheet.deleteRow(i + 1);
   }
   items.forEach(item => {
-    // id, category, text, isChecked, userId
-    sheet.appendRow([item.id, category, item.text, item.isChecked, uid]);
+    const row = headers.map(header => {
+      if (header === 'userId') return uid;
+      if (header === 'category') return category;
+      return item[header] !== undefined ? item[header] : '';
+    });
+    sheet.appendRow(row);
   });
 }
 
@@ -231,7 +247,11 @@ function setExpensesData(ss, uid, items) {
   }
   
   items.forEach(item => {
-    sheet.appendRow([item.id, item.title, item.amountKRW, item.amountTWD, item.date, item.category, item.exchangeRate, uid]);
+    const row = headers.map(header => {
+      if (header === 'userId') return uid;
+      return item[header] !== undefined ? item[header] : '';
+    });
+    sheet.appendRow(row);
   });
 }
 
