@@ -68,6 +68,27 @@ interface ItineraryCardProps {
 const ItineraryCard: React.FC<ItineraryCardProps> = ({
   item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, loadingInsight
 }) => {
+  // Helper to format time safely
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return { time: '--:--', period: '' };
+    // Handle "1899-12-30T12:00:00.000Z" or similar ISO
+    if (timeStr.includes('T')) {
+      try {
+        const date = new Date(timeStr);
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const period = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return { time: `${hours}:${minutes}`, period };
+      } catch (e) { return { time: timeStr, period: '' }; }
+    }
+    // Handle existing "10:00 AM" format
+    const parts = timeStr.split(' ');
+    if (parts.length === 2) return { time: parts[0], period: parts[1] };
+    return { time: timeStr, period: '' };
+  };
+
+  const { time, period } = formatTime(item.time);
   const catStyle = getCategoryStyle(item.category);
 
   const handleOpenNaverMap = (e: React.MouseEvent) => {
@@ -93,22 +114,22 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-[20px] mb-4 p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-50 group relative overflow-hidden">
+    <div className="bg-white rounded-[20px] mb-4 p-4 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-50 group relative overflow-hidden">
       {index !== total - 1 && (
         <div className="absolute left-[29px] top-[60px] bottom-[-20px] w-[2px] bg-slate-100 -z-10 group-hover:bg-blue-50 transition-colors"></div>
       )}
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3">
         {/* Time Column */}
-        <div className="flex flex-col items-center pt-1 min-w-[3.5rem]">
-          <span className="text-sm font-bold text-slate-800">{item.time.split(' ')[0]}</span>
-          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{item.time.split(' ')[1]}</span>
+        <div className="flex flex-col items-center pt-1 min-w-[3rem] w-12 flex-shrink-0">
+          <span className="text-sm font-bold text-slate-800">{time}</span>
+          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{period}</span>
           <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 ring-4 ring-blue-50"></div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0 pt-0.5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className={`text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 ${catStyle.bg} ${catStyle.text}`}>
+            <span className={`text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${catStyle.bg} ${catStyle.text}`}>
               {catStyle.icon}
               {item.category}
             </span>
@@ -120,9 +141,9 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             <div className="flex items-start text-slate-500 gap-1.5 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={handleOpenNaverMap}>
               <MapPin size={14} className="mt-0.5 flex-shrink-0" />
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-medium leading-tight">{item.address}</span>
+                <span className="text-xs font-medium leading-tight line-clamp-2 md:line-clamp-1">{item.address}</span>
                 {item.addressKR && (
-                  <span className="text-[10px] text-slate-400 font-normal leading-tight mt-0.5">{item.addressKR}</span>
+                  <span className="text-[10px] text-slate-400 font-normal leading-tight mt-0.5 truncate">{item.addressKR}</span>
                 )}
               </div>
             </div>
@@ -138,7 +159,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             <button
               onClick={(e) => { e.stopPropagation(); onGenerateInsight(item.id, item.title); }}
               disabled={loadingInsight}
-              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50 border border-slate-100 hover:border-indigo-100 z-10 relative"
+              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50 border border-slate-100 hover:border-indigo-100 z-10 relative whitespace-nowrap"
             >
               {loadingInsight ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
               <span>AI 導遊解說</span>
