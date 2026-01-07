@@ -179,10 +179,10 @@ export default function App() {
       try {
         const data = await fetchSheetData(user.uid);
         if (data.meta) {
-          setTripTitle(data.meta.title);
+          setTripTitle(data.meta.title || '韓國首爾・自由行');
           // Ensure we use the raw YYYY-MM-DD string from backend to avoid any timezone shifts
-          if (data.meta.startDate) setStartDate(data.meta.startDate.substring(0, 10));
-          if (data.meta.endDate) setEndDate(data.meta.endDate.substring(0, 10));
+          if (data.meta.startDate && typeof data.meta.startDate === 'string') setStartDate(data.meta.startDate.substring(0, 10));
+          if (data.meta.endDate && typeof data.meta.endDate === 'string') setEndDate(data.meta.endDate.substring(0, 10));
         }
         if (data.itinerary) {
           const groupedItineraries: Record<number, ItineraryItem[]> = {};

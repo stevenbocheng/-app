@@ -112,12 +112,15 @@ const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, onUpdateExpen
   };
 
   // Get unique dates (YYYY-MM-DD)
-  const uniqueDates = Array.from(new Set(expenses.map(item => item.date.includes('T') ? item.date.split('T')[0] : item.date))).sort().reverse();
+  const uniqueDates = Array.from(new Set(expenses
+    .filter(item => item && item.date) // Guard against null items or missing dates
+    .map(item => item.date.includes('T') ? item.date.split('T')[0] : item.date)
+  )).sort().reverse();
 
   // Filter expenses
   const filteredExpenses = selectedDateFilter === 'all'
     ? expenses
-    : expenses.filter(item => (item.date.includes('T') ? item.date.split('T')[0] : item.date) === selectedDateFilter);
+    : expenses.filter(item => item && item.date && (item.date.includes('T') ? item.date.split('T')[0] : item.date) === selectedDateFilter);
 
   const totalKRW = filteredExpenses.reduce((sum, item) => sum + item.amountKRW, 0);
   const totalTWD = filteredExpenses.reduce((sum, item) => sum + item.amountTWD, 0);
