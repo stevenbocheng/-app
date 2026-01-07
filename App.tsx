@@ -352,11 +352,15 @@ export default function App() {
     updateCurrentItinerary([...currentItinerary, newItem]);
   };
 
+  const handleUpdateItem = (id: string, updates: Partial<ItineraryItem>) => {
+    const newItems = currentItinerary.map(item => item.id === id ? { ...item, ...updates } : item);
+    updateCurrentItinerary(newItems);
+  };
+
   const handleGenerateInsight = async (id: string, title: string) => {
     setLoadingInsightId(id);
     const text = await getPlaceInsight(title);
-    const newItems = currentItinerary.map(item => item.id === id ? { ...item, aiInsight: text } : item);
-    updateCurrentItinerary(newItems);
+    handleUpdateItem(id, { aiInsight: text });
     setLoadingInsightId(null);
   };
 
@@ -492,6 +496,7 @@ export default function App() {
                 onMoveDown={() => moveItem(index, 'down')}
                 onDelete={() => requestDelete(item.id)}
                 onGenerateInsight={handleGenerateInsight}
+                onUpdateItem={handleUpdateItem}
                 loadingInsight={loadingInsightId === item.id}
               />
             ))
@@ -538,39 +543,43 @@ export default function App() {
         <DeleteConfirmModal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={confirmDelete} />
         <CurrencyCalculator />
 
-        <div className="px-6 pt-12 pb-2 flex justify-between items-center z-20 relative">
-          <div className="flex-1 mr-4 group">
-            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Seoul Travel Planner</p>
-            <div className="relative">
-              <input
-                type="text"
-                value={tripTitle}
-                onChange={handleTitleChange}
-                className="text-2xl font-black text-slate-800 tracking-tight bg-transparent border-b-2 border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none w-full transition-colors placeholder:text-slate-300 pr-8"
-                placeholder="輸入旅程名稱"
-              />
-              <Edit3 size={16} className="absolute right-0 top-1.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <CurrencyCalculator />
+
+        {activeTab !== 'expenses' && (
+          <div className="px-6 pt-12 pb-2 flex justify-between items-center z-20 relative">
+            <div className="flex-1 mr-4 group">
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Seoul Travel Planner</p>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={tripTitle}
+                  onChange={handleTitleChange}
+                  className="text-2xl font-black text-slate-800 tracking-tight bg-transparent border-b-2 border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none w-full transition-colors placeholder:text-slate-300 pr-8"
+                  placeholder="輸入旅程名稱"
+                />
+                <Edit3 size={16} className="absolute right-0 top-1.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0 text-slate-500 hover:text-blue-600"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center">
+                  <Settings size={20} />
+                </div>
+              </button>
+              <button
+                onClick={() => setIsProfileOpen(true)}
+                className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0"
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                  <User size={20} />
+                </div>
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0 text-slate-500 hover:text-blue-600"
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center">
-                <Settings size={20} />
-              </div>
-            </button>
-            <button
-              onClick={() => setIsProfileOpen(true)}
-              className="p-1 rounded-full ring-2 ring-white/50 shadow-sm active:scale-95 transition-all bg-white/50 backdrop-blur-sm flex-shrink-0"
-            >
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                <User size={20} />
-              </div>
-            </button>
-          </div>
-        </div>
+        )}
 
         <div className="flex-1 overflow-y-auto pb-40 scrollbar-hide relative z-10">
           {renderContent()}

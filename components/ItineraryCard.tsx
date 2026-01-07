@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin, Utensils, ShoppingBag, Camera, Coffee, Landmark,
   Wallet, Sparkles, Loader2, Trash2, ArrowUp, ArrowDown, Navigation
 } from 'lucide-react';
 import { ItineraryItem } from '../types';
+import { getPlaceDetails } from '../services/gemini';
 
 const getCategoryStyle = (category: string) => {
   const c = category || '';
@@ -62,13 +63,15 @@ interface ItineraryCardProps {
   onMoveDown: () => void;
   onDelete: () => void;
   onGenerateInsight: (id: string, title: string) => void;
+  onUpdateItem: (id: string, updates: Partial<ItineraryItem>) => void;
   loadingInsight: boolean;
 }
 
 const ItineraryCard: React.FC<ItineraryCardProps> = ({
-  item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, loadingInsight
+  item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, onUpdateItem, loadingInsight
 }) => {
-  // Helper to format time safely
+  const [isNavigating, setIsNavigating] = useState(false);
+
   // Helper to format time safely
   const formatTime = (timeStr: string) => {
     if (!timeStr) return { time: '--:--', period: '' };
@@ -83,7 +86,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
         hours = hours % 12 || 12;
         return { time: `${hours}:${minutes}`, period };
       } catch (e) {
-        // Fallback: try to extract HH:mm from the string if it looks like ISO
+        // Fallback
         const timeMatch = timeStr.match(/T(\d{2}):(\d{2})/);
         if (timeMatch) {
           let h = parseInt(timeMatch[1], 10);
@@ -111,10 +114,43 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
   const { time, period } = formatTime(item.time);
   const catStyle = getCategoryStyle(item.category);
 
-  const handleOpenNaverMap = (e: React.MouseEvent) => {
+  // Smart Navigation Logic
+  const handleSmartNav = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const query = encodeURIComponent(item.addressKR || item.address || item.title);
-    window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
+
+    // 1. If we already have a Korean address, use it directly (FAST)
+    if (item.addressKR && item.addressKR.trim() !== '') {
+      const query = encodeURIComponent(item.addressKR);
+      window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
+      return;
+    }
+
+    // 2. If not, we try to resolve it via AI (SMART)
+    setIsNavigating(true);
+    try {
+      console.log("Resolving Korean address for:", item.title);
+      const details = await getPlaceDetails(item.title);
+
+      if (details.addressKR) {
+        // Update the parent state/DB so next time it's fast
+        onUpdateItem(item.id, { addressKR: details.addressKR });
+
+        // Open map with the new address
+        const query = encodeURIComponent(details.addressKR);
+        window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
+      } else {
+        // Fallback: use title or Chinese address
+        const query = encodeURIComponent(item.title);
+        window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
+      }
+    } catch (error) {
+      console.error("Smart nav failed", error);
+      // Fallback on error
+      const query = encodeURIComponent(item.title);
+      window.open(`https://map.naver.com/v5/search/${query}`, '_blank');
+    } finally {
+      setIsNavigating(false);
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -158,7 +194,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 truncate">{item.title}</h3>
 
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-start text-slate-500 gap-1.5 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={handleOpenNaverMap}>
+            <div className="flex items-start text-slate-500 gap-1.5 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={handleSmartNav}>
               <MapPin size={14} className="mt-0.5 flex-shrink-0" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-medium leading-tight line-clamp-2 md:line-clamp-1">{item.address}</span>
@@ -194,11 +230,12 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           )}
 
           <button
-            onClick={handleOpenNaverMap}
-            className="mt-3 w-full py-2 bg-[#03C75A] hover:bg-[#02b351] text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-green-100 active:scale-95"
+            onClick={handleSmartNav}
+            disabled={isNavigating}
+            className="mt-3 w-full py-2 bg-[#03C75A] hover:bg-[#02b351] text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-green-100 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <Navigation size={12} />
-            <span>Naver Map 導航</span>
+            {isNavigating ? <Loader2 size={12} className="animate-spin" /> : <Navigation size={12} />}
+            <span>{isNavigating ? '正在尋找地點...' : 'Naver Map 導航'}</span>
           </button>
         </div>
 

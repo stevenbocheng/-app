@@ -269,12 +269,12 @@ const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, onUpdateExpen
               onClick={() => handleEdit(item)}
               className={`p-4 rounded-2xl shadow-sm border flex items-center justify-between group active:scale-[0.99] transition-all cursor-pointer ${editingId === item.id ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-100' : 'bg-white border-slate-50 hover:border-blue-100'}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={`w-10 h-10 rounded-full flex flex-col items-center justify-center flex-shrink-0 transition-colors ${editingId === item.id ? 'bg-blue-100 text-blue-500' : 'bg-slate-100 text-slate-500'}`}>
                   <span className="text-[8px] font-bold opacity-60 uppercase">{formatDateDisplay(item.date).split('/')[0]}/{formatDateDisplay(item.date).split('/')[1]}</span>
                   <TrendingUp size={14} className="mt-0.5" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="font-bold text-slate-800 text-sm truncate pr-2">{item.title}</div>
                   <div className="text-[10px] text-slate-400 font-medium">₩ {item.amountKRW.toLocaleString()}</div>
                 </div>
