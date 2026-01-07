@@ -80,7 +80,7 @@ const calculateTotalBudget = (items: ItineraryItem[]) => {
   if (!items) return null;
   items.forEach(item => {
     if (item.budget) {
-      const num = parseInt(item.budget.replace(/[^0-9]/g, ''), 10);
+      const num = parseInt(String(item.budget).replace(/[^0-9]/g, ''), 10);
       if (!isNaN(num)) total += num;
     }
   });
