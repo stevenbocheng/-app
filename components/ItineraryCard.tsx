@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   MapPin, Utensils, ShoppingBag, Camera, Coffee, Landmark,
-  Wallet, Sparkles, Loader2, Trash2, ArrowUp, ArrowDown, Navigation
+  Wallet, Sparkles, Loader2, Trash2, ArrowUp, ArrowDown, Navigation, Edit3
 } from 'lucide-react';
 import { ItineraryItem } from '../types';
 import { getPlaceDetails } from '../services/gemini';
@@ -64,11 +64,12 @@ interface ItineraryCardProps {
   onDelete: () => void;
   onGenerateInsight: (id: string, title: string) => void;
   onUpdateItem: (id: string, updates: Partial<ItineraryItem>) => void;
+  onEdit: () => void;
   loadingInsight: boolean;
 }
 
 const ItineraryCard: React.FC<ItineraryCardProps> = ({
-  item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, onUpdateItem, loadingInsight
+  item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, onUpdateItem, onEdit, loadingInsight
 }) => {
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -179,7 +180,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
         <div className="flex flex-col items-center pt-1 min-w-[3rem] w-12 flex-shrink-0">
           <span className="text-sm font-bold text-slate-800 truncate w-full text-center">{time}</span>
           <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{period}</span>
-          <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 ring-4 ring-blue-50"></div>
+          <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 ring-4 ring-blue-50 group-hover:bg-blue-600 transition-colors"></div>
         </div>
 
         {/* Content */}
@@ -241,6 +242,13 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
 
         {/* Actions Column */}
         <div className="flex flex-col gap-2 relative z-30">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-500 transition-colors active:scale-95 shadow-sm border border-slate-100"
+            title="編輯"
+          >
+            <Edit3 size={16} />
+          </button>
           <button
             onClick={handleDelete}
             className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors active:scale-95 shadow-sm border border-slate-100"

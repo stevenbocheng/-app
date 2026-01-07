@@ -156,6 +156,7 @@ export default function App() {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<ItineraryItem | null>(null);
 
   const [loadingInsightId, setLoadingInsightId] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<string | null>(null);
@@ -339,17 +340,25 @@ export default function App() {
     }
   };
 
-  const handleAddItem = (data: Partial<ItineraryItem>) => {
-    const newItem: ItineraryItem = {
-      id: Date.now().toString(),
-      title: data.title || '未命名',
-      time: data.time || '10:00 AM',
-      category: data.category || '自訂',
-      address: data.address || '首爾',
-      addressKR: data.addressKR,
-      budget: data.budget
-    };
-    updateCurrentItinerary([...currentItinerary, newItem]);
+  const handleSaveItem = (data: Partial<ItineraryItem>) => {
+    if (editingItem) {
+      // Edit existing
+      const newItems = currentItinerary.map(item => item.id === editingItem.id ? { ...item, ...data } : item);
+      updateCurrentItinerary(newItems);
+      setEditingItem(null);
+    } else {
+      // Add new
+      const newItem: ItineraryItem = {
+        id: Date.now().toString(),
+        title: data.title || '未命名',
+        time: data.time || '10:00 AM',
+        category: data.category || '自訂',
+        address: data.address || '首爾',
+        addressKR: data.addressKR,
+        budget: data.budget
+      };
+      updateCurrentItinerary([...currentItinerary, newItem]);
+    }
   };
 
   const handleUpdateItem = (id: string, updates: Partial<ItineraryItem>) => {
@@ -496,7 +505,9 @@ export default function App() {
                 onMoveDown={() => moveItem(index, 'down')}
                 onDelete={() => requestDelete(item.id)}
                 onGenerateInsight={handleGenerateInsight}
+                onGenerateInsight={handleGenerateInsight}
                 onUpdateItem={handleUpdateItem}
+                onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
                 loadingInsight={loadingInsightId === item.id}
               />
             ))
@@ -537,15 +548,25 @@ export default function App() {
           <div className="w-32 h-6 bg-slate-900 rounded-b-2xl sm:block hidden"></div>
         </div>
 
-        <AddItemModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddItem} />
+        <div className="h-7 w-full z-30 absolute top-0 flex justify-center">
+          <div className="w-32 h-6 bg-slate-900 rounded-b-2xl sm:block hidden"></div>
+        </div>
+
+        <AddItemModal
+          isOpen={isModalOpen}
+          onClose={() => { setIsModalOpen(false); setEditingItem(null); }}
+          onSave={handleSaveItem}
+          initialData={editingItem}
+        />
         <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} tripId={user?.uid || ''} onLogout={handleLogout} />
         <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         <DeleteConfirmModal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={confirmDelete} />
+
+        {/* Only one CurrencyCalculator */}
         <CurrencyCalculator />
 
-        <CurrencyCalculator />
-
-        {activeTab !== 'expenses' && (
+        {/* Header: Only show on Itinerary Tab */}
+        {activeTab === 'itinerary' && (
           <div className="px-6 pt-12 pb-2 flex justify-between items-center z-20 relative">
             <div className="flex-1 mr-4 group">
               <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Seoul Travel Planner</p>
@@ -588,7 +609,7 @@ export default function App() {
         {activeTab === 'itinerary' && (
           <div className="absolute bottom-24 right-6 z-20">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
               className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center shadow-xl shadow-slate-300 hover:scale-110 hover:bg-black transition-all active:scale-95 text-white"
             >
               <Plus size={24} />

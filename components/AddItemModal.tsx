@@ -6,10 +6,11 @@ import { getPlaceDetails } from '../services/gemini';
 interface AddItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (data: Partial<ItineraryItem>) => void;
+  onSave: (data: Partial<ItineraryItem>) => void;
+  initialData?: ItineraryItem | null;
 }
 
-const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) => {
+const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
   const [title, setTitle] = useState('');
   const [time, setTime] = useState('');
   const [category, setCategory] = useState('');
@@ -17,6 +18,24 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) =
   const [addressKR, setAddressKR] = useState('');
   const [budget, setBudget] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
+  React.useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || '');
+      setTime(initialData.time || '');
+      setCategory(initialData.category || '');
+      setAddress(initialData.address || '');
+      setAddressKR(initialData.addressKR || '');
+      setBudget(initialData.budget || '');
+    } else {
+      setTitle('');
+      setTime('');
+      setCategory('');
+      setAddress('');
+      setAddressKR('');
+      setBudget('');
+    }
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -47,11 +66,11 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) =
 
   const handleSubmit = () => {
     if (!title) return;
-    onAdd({
-      title, 
-      time: time || '10:00 AM', 
-      category: category || '自訂行程', 
-      address: address || '首爾', 
+    onSave({
+      title,
+      time: time || '10:00 AM',
+      category: category || '自訂行程',
+      address: address || '首爾',
       addressKR: addressKR,
       budget
     });
@@ -64,7 +83,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) =
       <div className="bg-white w-full sm:rounded-[32px] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="text-xl font-bold text-slate-800">新增行程</h3>
+            <h3 className="text-xl font-bold text-slate-800">{initialData ? '編輯行程' : '新增行程'}</h3>
             <p className="text-xs text-slate-400 mt-1">輸入店名，讓 AI 幫您找精準韓文地址</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-500 transition-colors">
@@ -96,11 +115,11 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) =
             </div>
           </div>
           <div className="flex gap-3">
-             <div className="flex-1">
+            <div className="flex-1">
               <label className="text-xs font-bold text-slate-400 ml-1 mb-1 block">顯示地址 (中文)</label>
               <input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="用於顯示" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 text-sm font-medium text-slate-600" />
             </div>
-             <div className="w-1/3">
+            <div className="w-1/3">
               <label className="text-xs font-bold text-slate-400 ml-1 mb-1 block">預算</label>
               <input type="text" value={budget} onChange={e => setBudget(e.target.value)} placeholder="₩..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 text-sm font-medium text-emerald-600" />
             </div>
@@ -118,9 +137,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd }) =
         </div>
         <button onClick={handleSubmit} disabled={!title} className={`w-full mt-6 font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 ${!title ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95 shadow-lg shadow-blue-200'}`}>
           <CheckCircle2 size={18} />
-          <span>確認新增</span>
+          <span>{initialData ? '儲存修改' : '確認新增'}</span>
         </button>
-        <div className="h-4 sm:h-0" /> 
+        <div className="h-4 sm:h-0" />
       </div>
     </div>
   );

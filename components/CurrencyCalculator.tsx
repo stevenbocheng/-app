@@ -59,7 +59,7 @@ const CurrencyCalculator = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 z-40 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-xl shadow-emerald-200 flex items-center justify-center transition-transform active:scale-95"
+        className="absolute bottom-24 left-6 z-40 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-xl shadow-emerald-200 flex items-center justify-center transition-transform active:scale-95"
         title="匯率計算機"
       >
         <Calculator size={24} />
@@ -68,7 +68,7 @@ const CurrencyCalculator = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="absolute inset-0 z-50 flex items-center justify-center px-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">>
       <div className="bg-white w-full max-w-[320px] rounded-[32px] p-6 shadow-2xl relative">
         <button
           onClick={() => setIsOpen(false)}
