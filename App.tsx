@@ -505,7 +505,6 @@ export default function App() {
                 onMoveDown={() => moveItem(index, 'down')}
                 onDelete={() => requestDelete(item.id)}
                 onGenerateInsight={handleGenerateInsight}
-                onGenerateInsight={handleGenerateInsight}
                 onUpdateItem={handleUpdateItem}
                 onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
                 loadingInsight={loadingInsightId === item.id}

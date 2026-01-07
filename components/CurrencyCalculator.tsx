@@ -68,7 +68,7 @@ const CurrencyCalculator = () => {
   }
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center px-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">>
+    <div className="absolute inset-0 z-50 flex items-center justify-center px-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-[320px] rounded-[32px] p-6 shadow-2xl relative">
         <button
           onClick={() => setIsOpen(false)}
