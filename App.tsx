@@ -172,11 +172,14 @@ export default function App() {
     }
   }, []);
 
+  const [initError, setInitError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!user) return;
 
     const initData = async () => {
       try {
+        setInitError(null);
         const data = await fetchSheetData(user.uid);
         if (data.meta) {
           setTripTitle(data.meta.title || '韓國首爾・自由行');
@@ -186,14 +189,16 @@ export default function App() {
         }
         if (data.itinerary) {
           const groupedItineraries: Record<number, ItineraryItem[]> = {};
-          data.itinerary.forEach((item: any) => {
-            const dayNum = Number(item.day) || 1;
-            if (!groupedItineraries[dayNum]) {
-              groupedItineraries[dayNum] = [];
-            }
-            groupedItineraries[dayNum].push(item);
-          });
-          setAllItineraries(groupedItineraries);
+          if (Array.isArray(data.itinerary)) {
+            data.itinerary.forEach((item: any) => {
+              const dayNum = Number(item.day) || 1;
+              if (!groupedItineraries[dayNum]) {
+                groupedItineraries[dayNum] = [];
+              }
+              groupedItineraries[dayNum].push(item);
+            });
+            setAllItineraries(groupedItineraries);
+          }
         }
         if (data.logistics) {
           if (data.logistics.flights) {
@@ -215,6 +220,7 @@ export default function App() {
         }
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
+        setInitError('無法讀取行程資料，請檢查您的 Trip ID 是否正確，或稍後再試。');
       }
     };
     initData();
@@ -386,6 +392,23 @@ export default function App() {
     return (
       <div className="min-h-screen w-full bg-[#E2E8F0] flex items-center justify-center font-sans">
         <LoginScreen onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  if (initError) {
+    return (
+      <div className="min-h-screen w-full bg-[#E2E8F0] flex items-center justify-center font-sans p-4">
+        <div className="bg-white rounded-[32px] p-8 shadow-xl max-w-sm text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Info size={32} className="text-red-500" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">資料讀取失敗</h3>
+          <p className="text-sm text-slate-500 mb-6 leading-relaxed">{initError}</p>
+          <button onClick={handleLogout} className="w-full py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors">
+            登出並重試
+          </button>
+        </div>
       </div>
     );
   }
