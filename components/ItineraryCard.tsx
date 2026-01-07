@@ -69,8 +69,10 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
   item, index, total, onMoveUp, onMoveDown, onDelete, onGenerateInsight, loadingInsight
 }) => {
   // Helper to format time safely
+  // Helper to format time safely
   const formatTime = (timeStr: string) => {
     if (!timeStr) return { time: '--:--', period: '' };
+
     // Handle "1899-12-30T12:00:00.000Z" or similar ISO
     if (timeStr.includes('T')) {
       try {
@@ -80,12 +82,30 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
         const period = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12;
         return { time: `${hours}:${minutes}`, period };
-      } catch (e) { return { time: timeStr, period: '' }; }
+      } catch (e) {
+        // Fallback: try to extract HH:mm from the string if it looks like ISO
+        const timeMatch = timeStr.match(/T(\d{2}):(\d{2})/);
+        if (timeMatch) {
+          let h = parseInt(timeMatch[1], 10);
+          const m = timeMatch[2];
+          const p = h >= 12 ? 'PM' : 'AM';
+          h = h % 12 || 12;
+          return { time: `${h}:${m}`, period: p };
+        }
+        return { time: 'Error', period: '' };
+      }
     }
+
     // Handle existing "10:00 AM" format
     const parts = timeStr.split(' ');
     if (parts.length === 2) return { time: parts[0], period: parts[1] };
-    return { time: timeStr, period: '' };
+
+    // Fallback for simple "HH:mm"
+    if (timeStr.includes(':')) {
+      return { time: timeStr, period: '' };
+    }
+
+    return { time: timeStr.substring(0, 5), period: '' };
   };
 
   const { time, period } = formatTime(item.time);
@@ -121,7 +141,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
       <div className="flex items-start gap-3">
         {/* Time Column */}
         <div className="flex flex-col items-center pt-1 min-w-[3rem] w-12 flex-shrink-0">
-          <span className="text-sm font-bold text-slate-800">{time}</span>
+          <span className="text-sm font-bold text-slate-800 truncate w-full text-center">{time}</span>
           <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{period}</span>
           <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 ring-4 ring-blue-50"></div>
         </div>

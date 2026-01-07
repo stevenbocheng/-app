@@ -8,7 +8,7 @@ const getAiClient = () => {
   const localKey = typeof window !== 'undefined' ? localStorage.getItem('GEMINI_API_KEY') : null;
   // 2. Try Environment Variable (Build time key)
   const envKey = process.env.API_KEY;
-  
+
   const apiKey = localKey || envKey;
 
   if (!apiKey) {
@@ -21,23 +21,23 @@ const getAiClient = () => {
 export const getPlaceDetails = async (placeName: string) => {
   // 定義嚴格的分類清單
   const categories = [
-    "餐廳", "咖啡廳", "甜點", "購物", "百貨", "市集", 
-    "景點", "公園", "樂園", "古蹟", "博物館", "美術館", 
+    "餐廳", "咖啡廳", "甜點", "購物", "百貨", "市集",
+    "景點", "公園", "樂園", "古蹟", "博物館", "美術館",
     "體驗", "酒吧", "交通", "住宿"
   ];
 
   const prompt = `使用者想去首爾的「${placeName}」。請提供：
-1. 詳細中文地址(address)。
-2. 詳細韓文地址(addressKR, 用於Naver Map導航)。
+1. 詳細中文地址(address) - 若使用者輸入中文名稱，請找出對應的正確地點。
+2. 詳細韓文地址(addressKR, 用於Naver Map導航) - 這是最重要的，請務必提供韓文地址。
 3. 最適合的類別(category)。必須從清單中選擇最精確的一個。
 4. 預估人均消費(budget, 韓元, 例如: ₩15,000)。`;
-  
+
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
       address: { type: Type.STRING },
       addressKR: { type: Type.STRING },
-      category: { 
+      category: {
         type: Type.STRING,
         enum: categories // 強制 AI 只能從上面定義的清單中選一個
       },
@@ -61,7 +61,7 @@ export const getPlaceDetails = async (placeName: string) => {
   } catch (error: any) {
     console.error("Gemini Place Details Error:", error);
     if (error.message === "MISSING_API_KEY") {
-        alert("請先點擊右上角設定，輸入您的 Gemini API Key 才能使用 AI 功能。");
+      alert("請先點擊右上角設定，輸入您的 Gemini API Key 才能使用 AI 功能。");
     }
     return {};
   }
@@ -82,31 +82,31 @@ export const getPlaceInsight = async (title: string) => {
   } catch (error: any) {
     console.error("Gemini Insight Error:", error);
     if (error.message === "MISSING_API_KEY") {
-        return "請先設定 API Key 才能使用此功能。";
+      return "請先設定 API Key 才能使用此功能。";
     }
     return "AI 連線錯誤。";
   }
 };
 
 export const getTripSuggestion = async (titles: string[], day: number) => {
-    const placeNames = titles.join(' -> ');
-    let prompt = placeNames.length === 0 ? "我目前這一天的行程是空的。請推薦 3 個首爾適合放在一起的景點給我。" : `我正在規劃首爾行程 Day ${day}，順序是：${placeNames}。請用繁體中文分析，給出一個優化建議或推薦下一個景點。50字內。`;
+  const placeNames = titles.join(' -> ');
+  let prompt = placeNames.length === 0 ? "我目前這一天的行程是空的。請推薦 3 個首爾適合放在一起的景點給我。" : `我正在規劃首爾行程 Day ${day}，順序是：${placeNames}。請用繁體中文分析，給出一個優化建議或推薦下一個景點。50字內。`;
 
-    try {
-        const ai = getAiClient();
-        const response = await ai.models.generateContent({
-            model: MODEL_NAME,
-            contents: prompt,
-            config: {
-                thinkingConfig: { thinkingBudget: 0 } // 關閉深度思考以加快速度
-            }
-        });
-        return response.text || "暫無建議";
-    } catch (error: any) {
-        console.error("Gemini Suggestion Error:", error);
-        if (error.message === "MISSING_API_KEY") {
-            return "請點擊右上角設定 API Key";
-        }
-        return "AI 連線錯誤。";
+  try {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        thinkingConfig: { thinkingBudget: 0 } // 關閉深度思考以加快速度
+      }
+    });
+    return response.text || "暫無建議";
+  } catch (error: any) {
+    console.error("Gemini Suggestion Error:", error);
+    if (error.message === "MISSING_API_KEY") {
+      return "請點擊右上角設定 API Key";
     }
+    return "AI 連線錯誤。";
+  }
 };
