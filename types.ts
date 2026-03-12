@@ -35,7 +35,8 @@ export interface ExpenseItem {
 export interface FlightDetail {
   airline: string;
   flightNumber: string;
-  time: string;
+  time: string; // Departure time
+  arrivalTime?: string; // Arrival time (Optional for backward compatibility)
   terminal: string;
 }
 
@@ -64,7 +65,7 @@ export interface WeatherData {
   fullDate: string;
   tempHigh?: number;
   tempLow?: number;
-  condition: 'sunny' | 'cloudy' | 'rainy' | 'unknown';
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'snow' | 'thunder' | 'fog' | 'unknown';
 }
 
 export type TabType = 'itinerary' | 'map' | 'checklist' | 'expenses' | 'info';

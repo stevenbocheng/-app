@@ -39,6 +39,12 @@ function doPost(e) {
       case 'login':
         result = verifyUser(ss, payload.username, payload.password);
         break;
+      case 'register':
+        result = registerUser(ss, payload.username, payload.password);
+        break;
+      case 'reset_password':
+        result = resetPassword(ss, payload.username);
+        break;
       case 'update_meta':
         setMeta(ss, uid, payload);
         break;
@@ -281,4 +287,76 @@ function verifyUser(ss, username, password) {
     }
   }
   return { success: false, error: '帳號或密碼錯誤' };
+}
+
+function registerUser(ss, username, password) {
+  let sheet = ss.getSheetByName('Users');
+  if (!sheet) {
+    sheet = ss.insertSheet('Users');
+    sheet.appendRow(['username', 'password', 'tripId', 'createdAt']);
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const userIdx = headers.indexOf('username');
+  
+  // Check if user already exists
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][userIdx]) === String(username)) {
+      return { success: false, error: '此電子信箱已被註冊' };
+    }
+  }
+  
+  // Generate a basic tripId or use username (uid)
+  const tripId = username; 
+  const newRow = headers.map(h => {
+    if (h === 'username') return username;
+    if (h === 'password') return password;
+    if (h === 'tripId') return tripId;
+    if (h === 'createdAt') return new Date();
+    return '';
+  });
+  
+  sheet.appendRow(newRow);
+  
+  return { 
+    success: true, 
+    user: { 
+      uid: username, 
+      username: username,
+      tripId: tripId
+    } 
+  };
+}
+
+function resetPassword(ss, username) {
+  const sheet = ss.getSheetByName('Users');
+  if (!sheet) return { success: false, error: 'Users sheet not found' };
+  
+  const data = sheet.getDataRange().getValues();
+  const userIdx = data[0].indexOf('username');
+  
+  let userFound = false;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][userIdx]) === String(username)) {
+      userFound = true;
+      break;
+    }
+  }
+  
+  // Even if not found, we return success to prevent user enumeration
+  // But in GAS we can actually send an email if we want
+  if (userFound) {
+    try {
+      MailApp.sendEmail({
+        to: username,
+        subject: "首爾旅遊規劃 - 重設密碼請求",
+        body: "您好，系統收到您的重設密碼請求。由於這是基於試算表的系統，請聯繫管理員手動更改您的密碼，或回覆此郵件確認。"
+      });
+    } catch (e) {
+      console.warn('MailApp failure:', e);
+    }
+  }
+  
+  return { success: true, message: '重設郵件已發送' };
 }

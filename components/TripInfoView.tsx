@@ -100,6 +100,12 @@ const TripInfoView: React.FC<TripInfoViewProps> = ({
                 <input type="text" placeholder="起飛時間" value={flightInfo?.outbound?.time || ''} onChange={e => handleOutboundChange('time', e.target.value)} className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-indigo-100" />
               </div>
             </div>
+            <div>
+              <div className="relative">
+                <Clock size={14} className="absolute left-3 top-3 text-slate-400" />
+                <input type="text" placeholder="抵達時間" value={flightInfo?.outbound?.arrivalTime || ''} onChange={e => handleOutboundChange('arrivalTime', e.target.value)} className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-indigo-100" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -125,6 +131,12 @@ const TripInfoView: React.FC<TripInfoViewProps> = ({
               <div className="relative">
                 <Clock size={14} className="absolute left-3 top-3 text-slate-400" />
                 <input type="text" placeholder="起飛時間" value={flightInfo?.inbound?.time || ''} onChange={e => handleInboundChange('time', e.target.value)} className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-orange-100" />
+              </div>
+            </div>
+            <div>
+              <div className="relative">
+                <Clock size={14} className="absolute left-3 top-3 text-slate-400" />
+                <input type="text" placeholder="抵達時間" value={flightInfo?.inbound?.arrivalTime || ''} onChange={e => handleInboundChange('arrivalTime', e.target.value)} className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-orange-100" />
               </div>
             </div>
           </div>

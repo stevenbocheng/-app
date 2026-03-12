@@ -12,18 +12,23 @@ import WeatherCard from './components/WeatherCard';
 import ItineraryCard from './components/ItineraryCard';
 import RouteItemCard from './components/RouteItemCard';
 import AddItemModal from './components/AddItemModal';
-import LoginScreen from './components/LoginScreen';
+import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
 import ChecklistView from './components/ChecklistView';
 import CurrencyCalculator from './components/CurrencyCalculator';
 import TripInfoView from './components/TripInfoView';
 import ExpenseTracker from './components/ExpenseTracker';
 import SettingsModal from './components/SettingsModal';
+// Removed Firebase auth imports as we use custom GAS auth
 
 // --- Helpers ---
-const mapWeatherCode = (code: number): 'sunny' | 'cloudy' | 'rainy' => {
+const mapWeatherCode = (code: number): 'sunny' | 'cloudy' | 'rainy' | 'snow' | 'thunder' | 'fog' => {
   if (code <= 1) return 'sunny';
-  if (code <= 48) return 'cloudy';
+  if (code <= 3) return 'cloudy';
+  if (code <= 48) return 'fog';
+  if (code >= 71 && code <= 77) return 'snow';
+  if (code >= 85 && code <= 86) return 'snow';
+  if (code >= 95) return 'thunder';
   return 'rainy';
 };
 
@@ -163,12 +168,17 @@ export default function App() {
   const [loadingSuggestion, setLoadingSuggestion] = useState(false);
 
   useEffect(() => {
-    // Check for "Remember Me" session
+    // Check for saved session in localStorage
     const savedUser = localStorage.getItem('seoul_travel_user');
     if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setShowLogin(false);
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setShowLogin(false);
+      } catch (e) {
+        console.error('Failed to parse saved user:', e);
+        localStorage.removeItem('seoul_travel_user');
+      }
     }
   }, []);
 
@@ -269,7 +279,9 @@ export default function App() {
           }));
           setWeatherData(newWeather);
         }
-      } catch (error) { }
+      } catch (error) {
+        console.error("Weather fetch failed:", error);
+      }
     };
     if (startDate && endDate) fetchWeather();
   }, [startDate, endDate]);
@@ -277,6 +289,7 @@ export default function App() {
   const handleLogin = (authenticatedUser: any) => {
     setUser(authenticatedUser);
     setShowLogin(false);
+    localStorage.setItem('seoul_travel_user', JSON.stringify(authenticatedUser));
   };
 
   const handleLogout = () => {
@@ -391,7 +404,10 @@ export default function App() {
   if (showLogin) {
     return (
       <div className="min-h-screen w-full bg-[#E2E8F0] flex items-center justify-center font-sans">
-        <LoginScreen onLogin={handleLogin} />
+        <AuthModal 
+          onClose={() => {}} // In root App, we might want to stay on Auth if not logged in
+          onSuccess={handleLogin} 
+        />
       </div>
     );
   }
